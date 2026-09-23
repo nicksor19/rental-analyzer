@@ -1,6 +1,11 @@
 from dbfread import DBF
 import pandas as pd
 
+#Tell Pandas to display every column when printing a df
+pd.set_option("display.max_columns", None)
+# Display large numbers normally instead of using scientific notation
+pd.set_option("display.float_format", "{:,.2f}".format)
+
 
 '''
 INFO
@@ -71,3 +76,54 @@ multifamily_df = df[df["USE_CODE"].isin(multifamily_codes)]
 
 # Show how many multifamily properties were found
 print(len(multifamily_df))
+
+
+#now that we know use_code is good we are gonna pring out all the usefull info
+
+#Show the first 10 multifamily properties with useful information
+print(
+    multifamily_df[
+        ["SITE_ADDR", "USE_CODE", "TOTAL_VAL", "LS_DATE", "LS_PRICE", "YEAR_BUILT", "BLD_AREA"]
+    ].head(10)
+)
+
+# Show summary statistics for multifamily sale prices
+print(multifamily_df["LS_PRICE"].describe())
+
+# Count the most common sale prices and show the top 15
+print(multifamily_df["LS_PRICE"].value_counts().head(15))
+
+# Calculate the assessed value per square foot for each multifamily property
+multifamily_df["VALUE_PER_SQFT"] = (
+    multifamily_df["TOTAL_VAL"] / multifamily_df["BLD_AREA"]
+)
+
+# Show the first 10 properties with the new calculated value
+print(
+    multifamily_df[
+        ["SITE_ADDR", "TOTAL_VAL", "BLD_AREA", "VALUE_PER_SQFT"]
+    ].head(10)
+)
+
+# Count multifamily properties that have no recorded building area
+print("Properties with 0 building area:")
+print((multifamily_df["BLD_AREA"] == 0).sum())
+
+# Show summary statistics for assessed value per square foot
+print(multifamily_df["VALUE_PER_SQFT"].describe())
+
+# Show the 10 properties with the highest assessed value per square foot
+print(
+    multifamily_df[
+        ["SITE_ADDR", "USE_CODE", "TOTAL_VAL", "BLD_AREA", "VALUE_PER_SQFT"]
+    ]
+    .sort_values("VALUE_PER_SQFT", ascending=False)
+    .head(10)
+)
+
+
+# Show value-per-square-foot statistics for each property use code
+print(
+    multifamily_df.groupby("USE_CODE")["VALUE_PER_SQFT"].describe()
+)
+
